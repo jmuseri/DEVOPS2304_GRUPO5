@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-sample-linux-deployment
+  namespace: eks-sample-app
+  labels:
+    app: eks-sample-linux-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eks-sample-linux-app
+  template:
+    metadata:
+      labels:
+        app: eks-sample-linux-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - name: http
+          containerPort: 80
+        imagePullPolicy: IfNotPresent
