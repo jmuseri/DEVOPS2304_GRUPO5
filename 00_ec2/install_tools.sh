@@ -1,40 +1,30 @@
 #!/bin/bash
 
 echo "Installing AWS CLI"
-
-curl -sSL https://awscli.amazonaws.com/awscli-v2/install | bash -
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+sudo apt install unzip
+unzip awscliv2.zip
+sudo ./aws/install
+rm -r aws
+rm awscliv2.zip
 
 echo "Installing kubectl"
-
-curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
 chmod +x ./kubectl
-mkdir -p $HOME/.kube
-sudo mv ./kubectl /usr/local/bin/kubectl
-export PATH=$PATH:/usr/local/bin
-echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
-kubectl version --client
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+kubectl version --output=yaml
 
-echo "Installing eksctl"
-
-curl -sLO https://github.com/aws/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz
-tar xzvf eksctl_$(uname -s)_amd64.tar.gz
-sudo mv eksctl /usr/local/bin
+echo "Installing ekctl"
+# Download EKS CLI https://github.com/weaveworks/eksctl
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
 export PATH=$PATH:/usr/local/bin
 echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 eksctl version
 
-echo "Installing Docker"
-
-sudo yum install -y docker.io
-
-sudo usermod -a -G docker ec2-user
-newgrp docker
-
 echo "Installing Helm"
-#  There is no official yum package for Helm yet. You'll need to install it using a different method like the script provided in the official documentation: https://helm.sh/docs/intro/install/
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+helm version
 
-echo "Installing Terraform"
-
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-sudo yum install -y terraform
