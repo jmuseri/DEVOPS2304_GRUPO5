@@ -28,3 +28,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 helm version
 
+echo "Installing terraform - OPEN TOFU"
+sudo snap install opentofu --classic
+opentofu.tofu --version
+
