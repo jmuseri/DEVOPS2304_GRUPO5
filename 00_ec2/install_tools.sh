@@ -1,45 +1,40 @@
 #!/bin/bash
 
 echo "Installing AWS CLI"
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
+
+curl -sSL https://awscli.amazonaws.com/awscli-v2/install | bash -
 
 echo "Installing kubectl"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
 chmod +x ./kubectl
-mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
-echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+mkdir -p $HOME/.kube
+sudo mv ./kubectl /usr/local/bin/kubectl
+export PATH=$PATH:/usr/local/bin
+echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 kubectl version --client
 
-echo "Installing ekctl"
-curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-sudo mv /tmp/eksctl /usr/local/bin
+echo "Installing eksctl"
+
+curl -sLO https://github.com/aws/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz
+tar xzvf eksctl_$(uname -s)_amd64.tar.gz
+sudo mv eksctl /usr/local/bin
 export PATH=$PATH:/usr/local/bin
 echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 eksctl version
 
-echo "Installing docker"
-sudo apt install -y docker
+echo "Installing Docker"
+
+sudo yum install -y docker.io
+
 sudo usermod -a -G docker ec2-user
 newgrp docker
-wget https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) 
-sudo mv docker-compose-$(uname -s)-$(uname -m) /usr/local/bin/docker-compose
-sudo chmod -v +x /usr/local/bin/docker-compose
-sudo systemctl enable docker.service
-sudo systemctl start docker.service
 
 echo "Installing Helm"
-sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-sudo chmod 700 get_helm.sh
-sudo ./get_helm.sh
+#  There is no official yum package for Helm yet. You'll need to install it using a different method like the script provided in the official documentation: https://helm.sh/docs/intro/install/
 
-echo "Installing terraform "
-# Download the installer script:
-sudo curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+echo "Installing Terraform"
 
-# Give it execution permissions:
-sudo chmod +x install-opentofu.sh
-
-# Run the installer:
-sudo ./install-opentofu.sh --install-method deb
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install -y terraform
